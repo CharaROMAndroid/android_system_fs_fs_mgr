@@ -81,9 +81,11 @@ bool ConstructVerityTable(const FsAvbHashtreeDescriptor& hashtree_desc,
     // Always use ignore_zero_blocks.
     target.IgnoreZeroBlocks();
 
-    // Always check only once
-    target.CheckAtMostOnce();
-
+    // Microdroid requires every read from host-backed storage to be verified.
+    std::string hardware;
+    if (!fs_mgr_get_boot_config("hardware", &hardware) || hardware != "microdroid") {
+        target.CheckAtMostOnce();
+    }
 
     if (com::android::libdm::dm_verity_verify_in_tasklet()) {
         LOG(INFO) << "Adding TryVerifyInTasklet to dm-verity for avb_util";
